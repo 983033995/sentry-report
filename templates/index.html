@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API数据导出工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            background: white;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: #ced4da;
+        }
+        
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .column-mapping {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            background: #f8f9fa;
+        }
+        
+        .column-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .column-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .column-item span {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .template-list {
+            margin-bottom: 20px;
+        }
+        
+        .template-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .template-item span {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .template-item div {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .api-url-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 25px;
+        }
+        
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .url-input-group input {
+            flex: 1;
+        }
+        
+        .parse-btn {
+            white-space: nowrap;
+            font-size: 12px;
+            padding: 8px 15px;
+            margin: 0;
+        }
+        
+        .method-group {
+            margin-top: 15px;
+            max-width: 200px;
+        }
+        
+        .pagination-config {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-top: 15px;
+        }
+        
+        .pagination-config h4 {
+            margin-bottom: 15px;
+            color: #495057;
+            font-size: 16px;
+        }
+        
+        #apiResult {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        #apiResult h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        #apiResult pre {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            #config > div {
+                flex-direction: column !important;
+                gap: 20px !important;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .column-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .column-item span {
+                text-align: center;
+                margin: 5px 0;
+            }
+            
+            .template-item {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .template-item div {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 API数据导出工具</h1>
+            <p>简单易用的API数据获取与Excel导出解决方案</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('config')">配置与导出</button>
+            <button class="tab" onclick="showTab('template')">模板管理</button>
+        </div>
+        
+        <!-- 配置与导出 -->
+        <div id="config" class="tab-content active">
+            <div style="display: flex; gap: 30px;">
+                <!-- 左侧：API配置 -->
+                <div style="flex: 1;">
+                    <h2 style="margin-bottom: 25px; color: #495057;">🔧 API接口配置</h2>
+                    <form id="apiForm">
+                        <div class="api-url-section">
+                            <div class="form-group">
+                                <label for="apiUrl">接口地址</label>
+                                <div class="url-input-group">
+                                    <input type="url" id="apiUrl" placeholder="https://api.example.com/data" required>
+                                    <button type="button" class="btn btn-secondary parse-btn" onclick="parseUrlParams()">解析URL参数</button>
+                                </div>
+                            </div>
+                            <div class="form-group method-group">
+                                <label for="apiMethod">请求方法</label>
+                                <select id="apiMethod">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apiHeaders">请求头 (JSON格式)</label>
+                            <textarea id="apiHeaders" placeholder='{"Authorization": "Bearer your-token", "Content-Type": "application/json"}'></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apiParams">请求参数 (JSON格式)</label>
+                            <textarea id="apiParams" placeholder='{"page": 1, "size": 100}'></textarea>
+                            <small>参数修改会自动同步到URL中</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="apiData">请求体数据 (JSON格式，仅POST)</label>
+                            <textarea id="apiData" placeholder='{"query": "example"}'></textarea>
+                        </div>
+                        
+                        <button type="button" class="btn btn-primary" onclick="testApi()">🧪 测试接口</button>
+                    </form>
+                    
+                    <div id="apiResult" style="margin-top: 20px;"></div>
+                </div>
+                
+                <!-- 右侧：Excel配置 -->
+                <div style="flex: 1;">
+                    <h2 style="margin-bottom: 25px; color: #495057;">📊 Excel导出配置</h2>
+                    <form id="excelForm">
+                        <div class="form-group">
+                            <label for="dataPath">数据路径</label>
+                            <input type="text" id="dataPath" placeholder="data.items (用.分隔嵌套字段)">
+                            <small>如果API返回的数据在嵌套对象中，请指定路径，如：data.items</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>列映射配置</label>
+                            <div class="column-mapping">
+                                <div id="columnMappings">
+                                    <div class="column-item">
+                                        <input type="text" placeholder="API字段名" class="api-field">
+                                        <span>→</span>
+                                        <input type="text" placeholder="Excel列名" class="excel-field">
+                                        <button type="button" class="btn btn-danger" onclick="removeColumnMapping(this)">删除</button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="addColumnMapping()">添加列映射</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="selectedColumns">选择导出列 (逗号分隔)</label>
+                            <input type="text" id="selectedColumns" placeholder="id,name,email,created_at">
+                            <small>留空则导出所有列</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="exportMode">导出模式</label>
+                            <select id="exportMode" onchange="togglePaginationConfig()">
+                                <option value="current">当前页数据</option>
+                                <option value="all">全部数据（自动分页）</option>
+                            </select>
+                            <small>选择"全部数据"将自动获取所有分页数据</small>
+                        </div>
+                        
+                        <div class="form-group" id="paginationConfig" style="display: none;">
+                            <label>分页配置</label>
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 1; margin-right: 10px;">
+                                    <label for="cursorParam">游标参数名</label>
+                                    <input type="text" id="cursorParam" value="cursor" placeholder="如：cursor">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="pageSizeParam">页大小参数名</label>
+                                    <input type="text" id="pageSizeParam" value="per_page" placeholder="如：per_page">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 1; margin-right: 10px;">
+                                    <label for="pageParam">页码参数名</label>
+                                    <input type="text" id="pageParam" value="page" placeholder="如：page（用于无游标分页）">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="maxPages">最大页数限制</label>
+                                    <input type="number" id="maxPages" value="100" min="1" max="1000" placeholder="防止无限循环">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="nextCursorPath">下一页游标路径</label>
+                                    <input type="text" id="nextCursorPath" value="links.next.cursor" placeholder="如：links.next.cursor">
+                                </div>
+                            </div>
+                            <small>支持游标分页（如Sentry API）和页码分页两种模式，系统会自动判断使用哪种方式</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- 底部操作按钮 -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center;">
+                <div class="form-group" style="display: inline-block; margin-right: 20px;">
+                    <label for="templateName">模板名称</label>
+                    <input type="text" id="templateName" placeholder="输入模板名称" style="width: 200px; display: inline-block;">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="saveTemplate()">💾 保存为模板</button>
+                <button type="button" class="btn btn-success" onclick="exportData()">📥 导出Excel</button>
+                <button type="button" class="btn btn-secondary" onclick="clearAllForms()">🗑️ 清空所有</button>
+            </div>
+        </div>
+        
+        <!-- 模板管理 -->
+        <div id="template" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #495057;">💾 模板管理</h2>
+            
+            <div class="template-list">
+                <h3 style="color: #495057; margin-bottom: 15px;">📋 已保存的模板</h3>
+                <div id="templateItems"></div>
+            </div>
+            
+            <button type="button" class="btn btn-secondary" onclick="loadTemplates()">🔄 刷新模板列表</button>
+        </div>
+        
+        <!-- 加载动画 -->
+        <div id="loading" class="loading"></div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let currentConfig = {
+            api_config: {},
+            excel_config: {}
+        };
+        
+        // URL参数解析和同步
+         function parseUrlParams() {
+             const urlInput = document.getElementById('apiUrl');
+             const paramsTextarea = document.getElementById('apiParams');
+             
+             try {
+                 const url = new URL(urlInput.value);
+                 const params = {};
+                 
+                 // 提取URL中的查询参数，正确处理URL编码
+                 url.searchParams.forEach((value, key) => {
+                     // 对于数组参数（如field），保持原始格式
+                     if (params[key]) {
+                         // 如果参数已存在，转换为数组
+                         if (Array.isArray(params[key])) {
+                             params[key].push(value);
+                         } else {
+                             params[key] = [params[key], value];
+                         }
+                     } else {
+                         params[key] = value;
+                     }
+                 });
+                 
+                 // 合并现有参数和URL参数
+                 let existingParams = {};
+                 try {
+                     existingParams = JSON.parse(paramsTextarea.value || '{}');
+                 } catch (e) {
+                     // 如果现有参数格式错误，使用空对象
+                 }
+                 
+                 const mergedParams = { ...existingParams, ...params };
+                 
+                 // 更新参数文本框
+                 paramsTextarea.value = JSON.stringify(mergedParams, null, 2);
+                 
+                 // 清理URL中的查询参数，保留基础URL
+                 const cleanUrl = url.origin + url.pathname;
+                 urlInput.value = cleanUrl;
+                 
+                 if (Object.keys(params).length > 0) {
+                     showMessage(`已解析 ${Object.keys(params).length} 个URL参数`);
+                 }
+                 
+             } catch (error) {
+                 // URL格式错误时不处理
+                 console.log('URL格式错误或为空:', error.message);
+             }
+         }
+        
+        // 参数同步到URL
+         function syncParamsToUrl() {
+             const urlInput = document.getElementById('apiUrl');
+             const paramsTextarea = document.getElementById('apiParams');
+             
+             try {
+                 const baseUrl = urlInput.value;
+                 const params = JSON.parse(paramsTextarea.value || '{}');
+                 
+                 if (baseUrl && Object.keys(params).length > 0) {
+                     const url = new URL(baseUrl);
+                     
+                     // 清除现有查询参数
+                     url.search = '';
+                     
+                     // 添加新参数，正确处理数组和特殊字符
+                      Object.entries(params).forEach(([key, value]) => {
+                          if (value !== null && value !== undefined && value !== '') {
+                              if (Array.isArray(value)) {
+                                  // 对于数组参数，添加多个同名参数
+                                  value.forEach(v => {
+                                      if (v !== null && v !== undefined && v !== '') {
+                                          url.searchParams.append(key, v);
+                                      }
+                                  });
+                              } else {
+                                  url.searchParams.append(key, value);
+                              }
+                          }
+                      });
+                     
+                     // 更新URL输入框（但不触发parseUrlParams）
+                     urlInput.removeEventListener('input', parseUrlParams);
+                     urlInput.value = url.toString();
+                     setTimeout(() => {
+                         urlInput.addEventListener('input', parseUrlParams);
+                     }, 100);
+                 }
+             } catch (error) {
+                 // 参数格式错误时不处理
+                 console.log('参数格式错误:', error.message);
+             }
+         }
+         
+         // 防抖函数，避免频繁同步
+         let syncTimeout;
+         function debounceSync() {
+             clearTimeout(syncTimeout);
+             syncTimeout = setTimeout(() => {
+                 syncParamsToUrl();
+             }, 500);
+         }
+         
+         // 初始化URL参数解析
+         function initUrlParamSync() {
+             const urlInput = document.getElementById('apiUrl');
+             const paramsTextarea = document.getElementById('apiParams');
+             
+             // 为URL输入框添加事件监听器
+             urlInput.addEventListener('input', parseUrlParams);
+             urlInput.addEventListener('paste', () => {
+                 setTimeout(parseUrlParams, 100);
+             });
+             
+             // 为参数文本框添加事件监听器
+             paramsTextarea.addEventListener('input', debounceSync);
+             paramsTextarea.addEventListener('paste', () => {
+                 setTimeout(debounceSync, 100);
+             });
+         }
+        
+        // 标签页切换
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有标签页的active类
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 显示消息
+        function showMessage(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // 显示/隐藏加载动画
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // 测试API接口
+        async function testApi() {
+            try {
+                showLoading(true);
+                
+                const config = {
+                    url: document.getElementById('apiUrl').value,
+                    method: document.getElementById('apiMethod').value,
+                    headers: JSON.parse(document.getElementById('apiHeaders').value || '{}'),
+                    params: JSON.parse(document.getElementById('apiParams').value || '{}'),
+                    data: JSON.parse(document.getElementById('apiData').value || '{}')
+                };
+                
+                currentConfig.api_config = config;
+                
+                const response = await fetch('/api/test-api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('API测试成功！');
+                    document.getElementById('apiResult').innerHTML = `
+                        <h3>API响应结果</h3>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">${JSON.stringify(result.data, null, 2)}</pre>
+                    `;
+                } else {
+                    showMessage(`API测试失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`请求失败: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 添加列映射
+        function addColumnMapping() {
+            const container = document.getElementById('columnMappings');
+            const div = document.createElement('div');
+            div.className = 'column-item';
+            div.innerHTML = `
+                <input type="text" placeholder="API字段名" class="api-field">
+                <span>→</span>
+                <input type="text" placeholder="Excel列名" class="excel-field">
+                <button type="button" class="btn btn-danger" onclick="removeColumnMapping(this)">删除</button>
+            `;
+            container.appendChild(div);
+        }
+        
+        // 删除列映射
+        function removeColumnMapping(button) {
+            button.parentElement.remove();
+        }
+        
+        // 切换分页配置显示
+        function togglePaginationConfig() {
+            const exportMode = document.getElementById('exportMode').value;
+            const paginationConfig = document.getElementById('paginationConfig');
+            
+            if (exportMode === 'all') {
+                paginationConfig.style.display = 'block';
+            } else {
+                paginationConfig.style.display = 'none';
+            }
+        }
+        
+        // 导出数据
+        async function exportData() {
+            try {
+                showLoading(true);
+                
+                // 收集API配置
+                const apiConfig = {
+                    url: document.getElementById('apiUrl').value,
+                    method: document.getElementById('apiMethod').value,
+                    headers: document.getElementById('apiHeaders').value,
+                    params: document.getElementById('apiParams').value,
+                    data: document.getElementById('apiData').value
+                };
+                
+                // 收集Excel配置
+                const columnMappings = {};
+                document.querySelectorAll('.column-item').forEach(item => {
+                    const apiField = item.querySelector('.api-field').value;
+                    const excelField = item.querySelector('.excel-field').value;
+                    if (apiField && excelField) {
+                        columnMappings[apiField] = excelField;
+                    }
+                });
+                
+                const excelConfig = {
+                    data_path: document.getElementById('dataPath').value,
+                    column_mapping: columnMappings,
+                    selected_columns: document.getElementById('selectedColumns').value.split(',').map(s => s.trim()).filter(s => s)
+                };
+                
+                // 收集分页配置
+                const exportMode = document.getElementById('exportMode').value;
+                const paginationConfig = {};
+                
+                if (exportMode === 'all') {
+                    paginationConfig.cursor_param = document.getElementById('cursorParam').value || 'cursor';
+                    paginationConfig.page_size_param = document.getElementById('pageSizeParam').value || 'per_page';
+                    paginationConfig.page_param = document.getElementById('pageParam').value || 'page';
+                    paginationConfig.max_pages = parseInt(document.getElementById('maxPages').value) || 100;
+                    paginationConfig.next_cursor_path = document.getElementById('nextCursorPath').value || 'links.next.cursor';
+                }
+                
+                const exportConfig = {
+                    api_config: apiConfig,
+                    excel_config: excelConfig,
+                    export_mode: exportMode,
+                    pagination_config: paginationConfig
+                };
+                
+                console.log('导出配置:', exportConfig);
+                
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(exportConfig)
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `export_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showMessage('Excel文件导出成功！');
+                } else {
+                    const error = await response.json();
+                    showMessage(`导出失败: ${error.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`导出失败: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 保存模板
+        async function saveTemplate() {
+            const templateName = document.getElementById('templateName').value;
+            if (!templateName) {
+                showMessage('请输入模板名称', 'error');
+                return;
+            }
+            
+            try {
+                // 收集当前配置
+                const config = {
+                    api_config: {
+                        url: document.getElementById('apiUrl').value,
+                        method: document.getElementById('apiMethod').value,
+                        headers: document.getElementById('apiHeaders').value,
+                        params: document.getElementById('apiParams').value,
+                        data: document.getElementById('apiData').value
+                    },
+                    excel_config: {
+                        data_path: document.getElementById('dataPath').value,
+                        selected_columns: document.getElementById('selectedColumns').value
+                    }
+                };
+                
+                // 收集列映射
+                const columnMappings = {};
+                document.querySelectorAll('.column-item').forEach(item => {
+                    const apiField = item.querySelector('.api-field').value;
+                    const excelField = item.querySelector('.excel-field').value;
+                    if (apiField && excelField) {
+                        columnMappings[apiField] = excelField;
+                    }
+                });
+                config.excel_config.column_mappings = columnMappings;
+                
+                const response = await fetch(`/api/templates/${templateName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showMessage('模板保存成功！');
+                    loadTemplates();
+                    document.getElementById('templateName').value = '';
+                } else {
+                    showMessage(`保存失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`保存失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 加载模板列表
+        async function loadTemplates() {
+            try {
+                const response = await fetch('/api/templates');
+                const templates = await response.json();
+                
+                const container = document.getElementById('templateItems');
+                container.innerHTML = '';
+                
+                if (templates.length === 0) {
+                    container.innerHTML = '<p>暂无保存的模板</p>';
+                    return;
+                }
+                
+                templates.forEach(templateName => {
+                    const div = document.createElement('div');
+                    div.className = 'template-item';
+                    div.innerHTML = `
+                        <span>${templateName}</span>
+                        <div>
+                            <button class="btn btn-primary" onclick="loadTemplate('${templateName}')">加载</button>
+                            <button class="btn btn-success" onclick="updateTemplate('${templateName}')">更新</button>
+                            <button class="btn btn-danger" onclick="deleteTemplate('${templateName}')">删除</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+            } catch (error) {
+                showMessage(`加载模板失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 加载模板
+        async function loadTemplate(templateName) {
+            try {
+                const response = await fetch(`/api/templates/${templateName}`);
+                const template = await response.json();
+                
+                if (response.ok) {
+                    // 加载API配置
+                    const apiConfig = template.api_config || {};
+                    document.getElementById('apiUrl').value = apiConfig.url || '';
+                    document.getElementById('apiMethod').value = apiConfig.method || 'GET';
+                    document.getElementById('apiHeaders').value = apiConfig.headers || '';
+                    document.getElementById('apiParams').value = apiConfig.params || '';
+                    document.getElementById('apiData').value = apiConfig.data || '';
+                    
+                    // 加载Excel配置
+                    const excelConfig = template.excel_config || {};
+                    document.getElementById('dataPath').value = excelConfig.data_path || '';
+                    document.getElementById('selectedColumns').value = excelConfig.selected_columns || '';
+                    
+                    // 加载列映射
+                    const container = document.getElementById('columnMappings');
+                    container.innerHTML = '';
+                    
+                    const columnMappings = excelConfig.column_mappings || {};
+                    if (Object.keys(columnMappings).length > 0) {
+                        Object.entries(columnMappings).forEach(([apiField, excelField]) => {
+                            const div = document.createElement('div');
+                            div.className = 'column-item';
+                            div.innerHTML = `
+                                <input type="text" placeholder="API字段名" class="api-field" value="${apiField}">
+                                <span>→</span>
+                                <input type="text" placeholder="Excel列名" class="excel-field" value="${excelField}">
+                                <button type="button" class="btn btn-danger" onclick="removeColumnMapping(this)">删除</button>
+                            `;
+                            container.appendChild(div);
+                        });
+                    } else {
+                        addColumnMapping();
+                    }
+                    
+                    showMessage(`模板 "${templateName}" 加载成功！`);
+                } else {
+                    showMessage(`加载模板失败: ${template.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`加载模板失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 删除模板
+        async function deleteTemplate(templateName) {
+            if (!confirm(`确定要删除模板 "${templateName}" 吗？`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/templates/${templateName}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showMessage('模板删除成功！');
+                    loadTemplates();
+                } else {
+                    showMessage(`删除失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`删除失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 更新模板
+        async function updateTemplate(templateName) {
+            if (!confirm(`确定要更新模板 "${templateName}" 吗？`)) {
+                return;
+            }
+            
+            try {
+                // 收集当前配置
+                const config = {
+                    api_config: {
+                        url: document.getElementById('apiUrl').value,
+                        method: document.getElementById('apiMethod').value,
+                        headers: document.getElementById('apiHeaders').value,
+                        params: document.getElementById('apiParams').value,
+                        data: document.getElementById('apiData').value
+                    },
+                    excel_config: {
+                        data_path: document.getElementById('dataPath').value,
+                        selected_columns: document.getElementById('selectedColumns').value
+                    }
+                };
+                
+                // 收集列映射
+                const columnMappings = {};
+                document.querySelectorAll('.column-item').forEach(item => {
+                    const apiField = item.querySelector('.api-field').value;
+                    const excelField = item.querySelector('.excel-field').value;
+                    if (apiField && excelField) {
+                        columnMappings[apiField] = excelField;
+                    }
+                });
+                config.excel_config.column_mappings = columnMappings;
+                
+                const response = await fetch(`/api/templates/${templateName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    showMessage(`模板 "${templateName}" 更新成功！`);
+                    loadTemplates();
+                } else {
+                    showMessage(`更新失败: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showMessage(`更新失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 清空所有表单
+        function clearAllForms() {
+            document.getElementById('apiForm').reset();
+            document.getElementById('excelForm').reset();
+            document.getElementById('templateName').value = '';
+            document.getElementById('apiResult').innerHTML = '';
+            document.getElementById('columnMappings').innerHTML = '';
+            addColumnMapping();
+        }
+        
+        // 清空表单
+        function clearApiForm() {
+            document.getElementById('apiForm').reset();
+            document.getElementById('apiResult').innerHTML = '';
+        }
+        
+        function clearExcelForm() {
+            document.getElementById('excelForm').reset();
+            document.getElementById('columnMappings').innerHTML = '';
+            addColumnMapping();
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addColumnMapping();
+            loadTemplates();
+            initUrlParamSync();
+        });
+    </script>
+</body>
+</html>

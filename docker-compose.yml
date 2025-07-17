@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  sentry-report:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      # 挂载配置目录，方便持久化配置
+      - ./config:/app/config
+      - ./templates_config:/app/templates_config
+      - ./output:/app/output
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 可选：添加nginx反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - sentry-report
+    restart: unless-stopped
+    profiles:
+      - with-nginx

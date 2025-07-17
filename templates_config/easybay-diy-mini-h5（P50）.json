@@ -1,0 +1,22 @@
+{
+  "api_config": {
+    "url": "https://dev-sentry.galaxy-immi.com/api/0/organizations/galaxysentry/events/",
+    "method": "GET",
+    "headers": "{\"cookie\": \"MEIQIA_TRACK_ID=2uc8bkoqU4zqynG5evKaPo7VMM2; MEIQIA_VISIT_ID=2uc8blHWJSzCfQrOLXmMbkvDqpO; Hm_lvt_5e176c61d51dcba8008a28b2c8b937be=1746778218; sc=J25IJqE9q5lw5XyxLgy7bge2kRKHlV8n; sentrysid=.eJxVjs1uwyAQhN-Fc2phwMT4lkh5gEaq1BtaMBgnBEsGqvwo796N2ksuq9V8M6N5kJwXnYeWDA9SMhnabUcV7ZXoGyYFZ-K5IRpqCbpmt-p5JAPpyJtmwJ5deoHsUllvTS1zzM3L0BwuMMcdfvt_01syQA4Y48pxK1RrlOsYlcYbt4WRA1UeegFGGuapAi88U8ZYj0xKy0UPQnDqFZbmOi7Y9Hk8XiGcvtNXtKiCLfOPW9YJ0QQRrre_hYjGE6Rp0RFvhcmh4R4-bCLPX0cSWVk:1uZl0m:5GN-C_nxl3KgUlM7ySffh3_CmAd-6nvZEPRLf1Z0jFM; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%2218f65a0087b17e4-016f1be1f0b06d-1b525637-2073600-18f65a0087c2598%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E5%BC%95%E8%8D%90%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC%22%2C%22%24latest_referrer%22%3A%22https%3A%2F%2Fportal.galaxy-ebs.com%2F%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMThmNjVhMDA4N2IxN2U0LTAxNmYxYmUxZjBiMDZkLTFiNTI1NjM3LTIwNzM2MDAtMThmNjVhMDA4N2MyNTk4IiwiaWRlbnRpdHlfdXNlcl9pZCI6Ijg0IiwiaWRlbnRpdHlfd3hfaWQiOiI3ODQ3YzhhMTg4NWY0NzUzOWI1NjkzZGQ4ZTdmY2UxMSIsIiRpZGVudGl0eV9tb2JpbGUiOiIxMzc5MDAzNTU0NyIsIiRpZGVudGl0eV9lbWFpbCI6IjEyMzQ1NkBxcS5jb20ifQ%3D%3D%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%22%2C%22value%22%3A%22%22%7D%2C%22%24device_id%22%3A%2218f65a0087b17e4-016f1be1f0b06d-1b525637-2073600-18f65a0087c2598%22%7D\"}",
+    "params": "{\n  \"cursor\": \"0:0:1\",\n  \"dataset\": \"metrics\",\n  \"environment\": \"prod\",\n  \"field\": [\n    \"team_key_transaction\",\n    \"transaction\",\n    \"transaction.op\",\n    \"project\",\n    \"tpm()\",\n    \"p50(transaction.duration)\",\n    \"p75(transaction.duration)\",\n    \"p95(transaction.duration)\",\n    \"count_unique(user)\",\n    \"count_miserable(user)\",\n    \"user_misery()\"\n  ],\n  \"per_page\": \"50\",\n  \"project\": \"9\",\n  \"query\": \"( ( transaction.op:pageload OR transaction.op:navigation OR transaction.op:ui.render OR transaction.op:interaction ) OR project.id:[9] ) !transaction.op:http.server event.type:transaction\",\n  \"referrer\": \"api.performance.landing-table\",\n  \"sort\": [\n    \"-team_key_transaction\",\n    \"-p50_transaction_duration\"\n  ],\n  \"statsPeriod\": \"7d\"\n}",
+    "data": ""
+  },
+  "excel_config": {
+    "data_path": "data",
+    "selected_columns": "",
+    "column_mappings": {
+      "count_unique(user)": "用户数",
+      "p50(transaction.duration)": "P50",
+      "p75(transaction.duration)": "P75",
+      "p95(transaction.duration)": "P95",
+      "project": "项目名",
+      "tpm()": "tpm",
+      "transaction": "路径"
+    }
+  }
+}
